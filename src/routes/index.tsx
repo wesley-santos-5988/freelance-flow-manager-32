@@ -98,7 +98,7 @@ function TabBtn({ icon, label, active, onClick }: { icon: React.ReactNode; label
   );
 }
 
-function HomeTab({ svc, month, goal }: { svc: Svc; month: string; goal?: number }) {
+function HomeTab({ svc, month, goal }: { svc: Svc; month: string; goal: number | undefined }) {
   const [filter, setFilter] = useState<Payment | "Todos">("Todos");
   const all = svc.items.filter((s) => s.month === month);
   const list = all.filter((s) => filter === "Todos" || s.payment === filter);
