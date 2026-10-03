@@ -142,7 +142,7 @@ function AllTab({ svc }: { svc: Svc }) {
 }
 
 function ServiceCard({ s, svc, showMonth }: { s: Service; svc: Svc; showMonth?: boolean }) {
-  const nextPay = () => svc.update(s.id, { payment: PAYMENTS[(PAYMENTS.indexOf(s.payment) + 1) % 3] });
+  const nextPay = () => svc.update(s.id, { payment: PAYMENTS[(PAYMENTS.indexOf(s.payment) + 1) % 3]! });
   return (
     <article className="mt-3 rounded-3xl bg-surface p-5 ring-1 ring-border animate-fade-in">
       <div className="flex items-start justify-between gap-3">

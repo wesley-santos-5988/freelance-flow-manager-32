@@ -18,7 +18,7 @@ export type Service = {
 export const MONTHS = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
 export const monthKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-export const monthLabel = (k: string) => MONTHS[Number(k.split("-")[1]) - 1];
+export const monthLabel = (k: string) => MONTHS[Number(k.split("-")[1]) - 1] ?? "";
 export const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 export const received = (s: Service) => (s.payment === "Pago" ? s.value : s.payment === "50%" ? s.value / 2 : 0);
 
