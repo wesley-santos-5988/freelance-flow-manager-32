@@ -226,22 +226,6 @@ function FinanceTab({ items, months, month, goals }: { items: Service[]; months:
   );
 }
 
-function SettingsTab({ dark, toggle, clear }: { dark: boolean; toggle: () => void; clear: () => void }) {
-  return (
-    <div className="mt-4 space-y-2">
-      <button onClick={toggle} className="tap flex w-full items-center justify-between rounded-2xl bg-surface px-4 py-3 ring-1 ring-border">
-        <span className="text-sm font-bold">Tema {dark ? "escuro" : "claro"}</span>
-        <span className={`flex h-6 w-11 items-center rounded-full p-0.5 transition-colors ${dark ? "bg-flame" : "bg-muted"}`}>
-          <span className={`size-5 rounded-full bg-on-color shadow transition-transform ${dark ? "translate-x-5" : ""}`} />
-        </span>
-      </button>
-      <button onClick={() => confirm("Apagar todos os serviços?") && clear()} className="tap w-full rounded-2xl bg-surface px-4 py-3 text-left text-sm font-bold text-coral ring-1 ring-border">
-        Apagar todos os dados
-      </button>
-    </div>
-  );
-}
-
 function Empty() {
   return <p className="mt-3 rounded-2xl border-2 border-dashed p-6 text-center text-xs font-semibold text-muted-foreground">Nenhum serviço aqui. Toque no + para adicionar.</p>;
 }
