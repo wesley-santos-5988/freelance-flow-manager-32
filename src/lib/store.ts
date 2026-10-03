@@ -64,3 +64,18 @@ export function useTheme() {
   }, [dark]);
   return { dark, toggle: () => setDark((d) => !d) };
 }
+
+export function useGoals() {
+  const [goals, setGoals] = useState<Record<string, number>>({});
+  useEffect(() => {
+    const raw = localStorage.getItem("freela-goals");
+    if (raw) setGoals(JSON.parse(raw));
+  }, []);
+  const set = (m: string, v: number) =>
+    setGoals((g) => {
+      const n = { ...g, [m]: v };
+      localStorage.setItem("freela-goals", JSON.stringify(n));
+      return n;
+    });
+  return { goals, set };
+}
