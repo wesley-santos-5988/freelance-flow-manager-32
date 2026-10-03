@@ -20,6 +20,8 @@
   --color-popover-foreground: var(--foreground);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
+  --color-glass: var(--glass);
+  --color-glass-border: var(--glass-border);
   --color-flame: var(--flame);
   --color-lemon: var(--lemon);
   --color-mint: var(--mint);
@@ -38,6 +40,8 @@
 
 :root {
   --radius: 1rem;
+  --glass: oklch(0 0 0 / 42%);
+  --glass-border: oklch(1 0 0 / 12%);
   --background: oklch(0.966 0.01 95);
   --foreground: oklch(0.2 0.008 70);
   --surface: oklch(1 0 0);
@@ -56,6 +60,8 @@
 }
 
 .dark {
+  --glass: oklch(0 0 0 / 52%);
+  --glass-border: oklch(1 0 0 / 12%);
   --background: oklch(0.17 0.008 70);
   --foreground: oklch(0.96 0.01 95);
   --surface: oklch(0.23 0.01 70);
