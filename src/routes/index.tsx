@@ -71,7 +71,7 @@ function App() {
       </div>
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 flex justify-center pb-4">
-        <nav className="pointer-events-auto flex w-[86%] max-w-[360px] items-center justify-between rounded-full border border-glass-border bg-glass p-1.5 shadow-lg backdrop-blur-2xl backdrop-saturate-150">
+        <nav className="pointer-events-auto flex w-fit min-w-[220px] items-center justify-between gap-8 rounded-full border border-glass-border bg-glass px-2 p-1.5 shadow-lg backdrop-blur-2xl backdrop-saturate-150">
           <TabBtn icon={<Home size={17} />} label="Início" active={tab === "inicio"} onClick={() => setTab("inicio")} />
           <button onClick={() => setOpen(true)} aria-label="Novo serviço" className="tap -mt-7 grid size-12 shrink-0 place-items-center rounded-full bg-flame text-on-color shadow-xl ring-4 ring-background">
             <Plus size={22} strokeWidth={2.5} />
