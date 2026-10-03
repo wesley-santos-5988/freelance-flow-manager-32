@@ -20,6 +20,8 @@
   --color-popover-foreground: var(--foreground);
   --color-ink: var(--ink);
   --color-ink-foreground: var(--ink-foreground);
+  --color-glass: var(--glass);
+  --color-glass-border: var(--glass-border);
   --color-flame: var(--flame);
   --color-lemon: var(--lemon);
   --color-mint: var(--mint);
