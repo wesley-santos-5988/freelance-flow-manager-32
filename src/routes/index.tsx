@@ -85,7 +85,7 @@ function App() {
   );
 }
 
-function TabBtn({ icon, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
+function TabBtn({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
   return (
     <button onClick={onClick} aria-label={label} className={`tap grid size-10 place-items-center rounded-full ${active ? "bg-flame text-on-color" : "text-ink-foreground/60"}`}>
       {icon}
