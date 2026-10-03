@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { Home, Wallet, Settings, Plus, Moon, Sun, Trash2, X, Target, Check, Pencil } from "lucide-react";
+import { Home, Wallet, Plus, Moon, Sun, Trash2, X, Target, Check, Pencil } from "lucide-react";
 import {
   PHASES, PAYMENTS, MONTHS, brl, monthKey, monthLabel, received, useServices, useTheme, useGoals,
   type Service, type Phase, type Payment,
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
   component: App,
 });
 
-type Tab = "inicio" | "financeiro" | "ajustes";
+type Tab = "inicio" | "financeiro";
 type Svc = ReturnType<typeof useServices>;
 type Goals = ReturnType<typeof useGoals>;
 
@@ -50,7 +50,7 @@ function App() {
               {new Date().toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "long" })}
             </p>
             <h1 className="font-display text-xl font-bold leading-tight">
-              {{ inicio: "Seus serviços", financeiro: "Financeiro", ajustes: "Ajustes" }[tab]}
+              {{ inicio: "Seus serviços", financeiro: "Financeiro" }[tab]}
             </h1>
           </div>
           <button onClick={theme.toggle} aria-label="Alternar tema" className="tap grid size-9 shrink-0 place-items-center rounded-full bg-ink text-ink-foreground">
@@ -58,29 +58,25 @@ function App() {
           </button>
         </header>
 
-        {tab !== "ajustes" && (
-          <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto">
-            {months.map((m) => (
-              <button key={m} onClick={() => setMonth(m)} className={`tap shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold ring-1 ring-border ${m === month ? "bg-ink text-ink-foreground" : "bg-surface text-muted-foreground"}`}>
-                {monthLabel(m)}{m.slice(0, 4) !== String(new Date().getFullYear()) && ` ${m.slice(2, 4)}`}
-              </button>
-            ))}
-          </div>
-        )}
+        <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto">
+          {months.map((m) => (
+            <button key={m} onClick={() => setMonth(m)} className={`tap shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold ring-1 ring-border ${m === month ? "bg-ink text-ink-foreground" : "bg-surface text-muted-foreground"}`}>
+              {monthLabel(m)}{m.slice(0, 4) !== String(new Date().getFullYear()) && ` ${m.slice(2, 4)}`}
+            </button>
+          ))}
+        </div>
 
         {tab === "inicio" && <HomeTab svc={svc} month={month} goal={goals.goals[month]} />}
         {tab === "financeiro" && <FinanceTab items={svc.items} months={months} month={month} goals={goals} />}
-        {tab === "ajustes" && <SettingsTab dark={theme.dark} toggle={theme.toggle} clear={svc.clear} />}
       </div>
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 flex justify-center pb-4">
-        <nav className="pointer-events-auto flex w-[86%] max-w-[360px] items-center justify-between rounded-full bg-ink p-1.5 shadow-2xl">
-          <TabBtn icon={<Home size={16} />} label="Início" active={tab === "inicio"} onClick={() => setTab("inicio")} />
+        <nav className="pointer-events-auto flex w-[86%] max-w-[360px] items-center justify-between rounded-full border border-white/10 bg-ink/70 p-1.5 shadow-2xl backdrop-blur-xl">
+          <TabBtn icon={<Home size={17} />} label="Início" active={tab === "inicio"} onClick={() => setTab("inicio")} />
           <button onClick={() => setOpen(true)} aria-label="Novo serviço" className="tap -mt-7 grid size-12 shrink-0 place-items-center rounded-full bg-flame text-on-color shadow-xl ring-4 ring-background">
             <Plus size={22} strokeWidth={2.5} />
           </button>
-          <TabBtn icon={<Wallet size={16} />} label="Financeiro" active={tab === "financeiro"} onClick={() => setTab("financeiro")} />
-          <TabBtn icon={<Settings size={16} />} label="Ajustes" active={tab === "ajustes"} onClick={() => setTab("ajustes")} />
+          <TabBtn icon={<Wallet size={17} />} label="Financeiro" active={tab === "financeiro"} onClick={() => setTab("financeiro")} />
         </nav>
       </div>
 
@@ -89,11 +85,10 @@ function App() {
   );
 }
 
-function TabBtn({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
+function TabBtn({ icon, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} className={`tap flex min-w-0 items-center gap-1.5 rounded-full px-3 py-2 ${active ? "bg-flame text-on-color" : "text-ink-foreground/60"}`}>
+    <button onClick={onClick} aria-label={label} className={`tap grid size-10 place-items-center rounded-full ${active ? "bg-flame text-on-color" : "text-ink-foreground/60"}`}>
       {icon}
-      {active && <span className="text-[11px] font-bold">{label}</span>}
     </button>
   );
 }
