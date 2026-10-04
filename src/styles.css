@@ -22,8 +22,10 @@
   --color-ink-foreground: var(--ink-foreground);
   --color-glass: var(--glass);
   --color-glass-border: var(--glass-border);
+  --color-glass-foreground: var(--glass-foreground);
   --color-flame: var(--flame);
   --color-lemon: var(--lemon);
+  --color-phase: var(--phase);
   --color-mint: var(--mint);
   --color-coral: var(--coral);
   --color-sky: var(--sky);
@@ -42,6 +44,7 @@
   --radius: 1rem;
   --glass: oklch(0 0 0 / 42%);
   --glass-border: oklch(1 0 0 / 12%);
+  --glass-foreground: oklch(1 0 0 / 82%);
   --background: oklch(0.966 0.01 95);
   --foreground: oklch(0.2 0.008 70);
   --surface: oklch(1 0 0);
@@ -49,6 +52,7 @@
   --ink-foreground: oklch(0.966 0.01 95);
   --flame: oklch(0.68 0.21 38);
   --lemon: oklch(0.88 0.18 95);
+  --phase: oklch(0.7 0.17 78);
   --mint: oklch(0.68 0.16 155);
   --coral: oklch(0.66 0.21 25);
   --sky: oklch(0.56 0.22 262);
@@ -62,6 +66,7 @@
 .dark {
   --glass: oklch(0 0 0 / 52%);
   --glass-border: oklch(1 0 0 / 12%);
+  --glass-foreground: oklch(1 0 0 / 82%);
   --background: oklch(0.17 0.008 70);
   --foreground: oklch(0.96 0.01 95);
   --surface: oklch(0.23 0.01 70);
@@ -70,6 +75,7 @@
   --muted: oklch(0.28 0.01 70);
   --muted-foreground: oklch(0.96 0.01 95 / 55%);
   --border: oklch(1 0 0 / 9%);
+  --phase: oklch(0.82 0.17 92);
 }
 
 @layer base {

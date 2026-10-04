@@ -13,6 +13,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Organize seus serviços por mês, acompanhe fases, pagamentos e metas." },
       { property: "og:title", content: "Freela — Gestão de serviços para autônomos" },
       { property: "og:description", content: "Organize seus serviços por mês, acompanhe fases, pagamentos e metas." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: App,
@@ -43,7 +45,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <div className="mx-auto max-w-[480px] px-4 pb-28 pt-4 md:max-w-2xl">
+      <div className="mx-auto max-w-[480px] px-4 pb-[calc(8rem+env(safe-area-inset-bottom))] pt-4 md:max-w-2xl">
         <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
@@ -70,7 +72,7 @@ function App() {
         {tab === "financeiro" && <FinanceTab items={svc.items} months={months} month={month} goals={goals} />}
       </div>
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 flex justify-center pb-4">
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 flex justify-center pb-[calc(1rem+env(safe-area-inset-bottom))]">
         <nav className="pointer-events-auto flex w-fit min-w-[220px] items-center justify-between gap-8 rounded-full border border-glass-border bg-glass px-2 p-1.5 shadow-lg backdrop-blur-2xl backdrop-saturate-150">
           <TabBtn icon={<Home size={17} />} label="Início" active={tab === "inicio"} onClick={() => setTab("inicio")} />
           <button onClick={() => setOpen(true)} aria-label="Novo serviço" className="tap -mt-7 grid size-12 shrink-0 place-items-center rounded-full bg-flame text-on-color shadow-xl ring-4 ring-background">
@@ -87,7 +89,7 @@ function App() {
 
 function TabBtn({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} aria-label={label} className={`tap grid size-10 place-items-center rounded-full ${active ? "bg-flame text-on-color" : "text-ink-foreground/60"}`}>
+    <button onClick={onClick} aria-label={label} className={`tap grid size-10 place-items-center rounded-full ${active ? "bg-flame text-on-color" : "text-glass-foreground hover:text-on-color"}`}>
       {icon}
     </button>
   );
@@ -138,7 +140,7 @@ function ServiceCard({ s, svc }: { s: Service; svc: Svc }) {
   const nextPay = () => svc.update(s.id, { payment: PAYMENTS[(PAYMENTS.indexOf(s.payment) + 1) % 3]! });
   const idx = PHASES.indexOf(s.phase);
   return (
-    <article className="rounded-2xl bg-surface px-3.5 py-3 ring-1 ring-border animate-fade-in">
+    <article className="rounded-2xl bg-surface px-3.5 py-3 ring-1 ring-border">
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
         <div className="min-w-0">
           <h3 className="truncate text-sm font-bold leading-tight">{s.client}</h3>
@@ -151,8 +153,8 @@ function ServiceCard({ s, svc }: { s: Service; svc: Svc }) {
       </div>
       <div className="mt-2 grid grid-cols-4 gap-1">
         {PHASES.map((p, i) => (
-          <button key={p} onClick={() => svc.update(s.id, { phase: p })} className="tap group text-left" aria-label={p}>
-            <span className={`block h-1.5 rounded-full ${i <= idx ? "bg-lemon" : "bg-muted"}`} />
+          <button key={p} onClick={() => svc.update(s.id, { phase: p })} className="tap group relative text-left before:absolute before:-inset-y-2.5 before:inset-x-0 before:content-['']" aria-label={p}>
+            <span className={`block h-1.5 rounded-full ${i <= idx ? "bg-phase" : "bg-muted"}`} />
             <span className={`mt-1 block truncate text-[9px] font-bold ${i === idx ? "text-foreground" : "text-muted-foreground"}`}>{p}</span>
           </button>
         ))}
@@ -239,7 +241,7 @@ function NewSheet({ month, onClose, onSave }: { month: string; onClose: () => vo
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={(e) => { e.preventDefault(); if (!f.client || !f.value) return; onSave({ ...f, value: Number(f.value) }); }}
-        className="w-full max-w-[480px] space-y-2.5 rounded-t-3xl bg-background p-5 animate-fade-in md:rounded-3xl"
+        className="max-h-[calc(100dvh-1rem)] w-full max-w-[480px] space-y-2.5 overflow-y-auto overscroll-contain rounded-t-3xl bg-background p-5 [padding-bottom:max(1.25rem,env(safe-area-inset-bottom))] animate-fade-in md:max-h-[90dvh] md:rounded-3xl"
       >
         <div className="flex items-center justify-between">
           <h2 className="font-display text-lg font-bold">Novo serviço</h2>
