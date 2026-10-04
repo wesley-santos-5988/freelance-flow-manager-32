@@ -153,7 +153,7 @@ function ServiceCard({ s, svc }: { s: Service; svc: Svc }) {
       </div>
       <div className="mt-2 grid grid-cols-4 gap-1">
         {PHASES.map((p, i) => (
-          <button key={p} onClick={() => svc.update(s.id, { phase: p })} className="tap group relative text-left before:absolute before:-inset-y-2 before:inset-x-0 before:content-['']" aria-label={p}>
+          <button key={p} onClick={() => svc.update(s.id, { phase: p })} className="tap group relative text-left before:absolute before:-inset-y-2.5 before:inset-x-0 before:content-['']" aria-label={p}>
             <span className={`block h-1.5 rounded-full ${i <= idx ? "bg-phase" : "bg-muted"}`} />
             <span className={`mt-1 block truncate text-[9px] font-bold ${i === idx ? "text-foreground" : "text-muted-foreground"}`}>{p}</span>
           </button>
