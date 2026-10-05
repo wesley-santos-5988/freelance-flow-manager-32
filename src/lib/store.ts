@@ -72,8 +72,12 @@ function id() {
 
 function monthRange(start: string, end: string) {
   const result: string[] = [];
-  let [year, month] = start.split("-").map(Number);
-  const [endYear, endMonth] = end.split("-").map(Number);
+  const startParts = start.split("-").map(Number);
+  const endParts = end.split("-").map(Number);
+  let year = startParts[0] ?? 0;
+  let month = startParts[1] ?? 1;
+  const endYear = endParts[0] ?? 0;
+  const endMonth = endParts[1] ?? 1;
   while (year < endYear || (year === endYear && month <= endMonth)) {
     result.push(`${year}-${String(month).padStart(2, "0")}`);
     month += 1;
@@ -183,7 +187,16 @@ export function useWorkspace() {
     return { ...previous, contracts, services: previous.services.filter((item) => item.id !== serviceId) };
   });
 
-  return { ...workspace, ready, add, update, remove };
+  const stopContract = (contractId: string) => setWorkspace((previous) => {
+    const endMonth = monthKey();
+    return {
+      ...previous,
+      contracts: previous.contracts.map((contract) => contract.id === contractId ? { ...contract, endMonth } : contract),
+      services: previous.services.filter((service) => service.contractId !== contractId || service.month <= endMonth),
+    };
+  });
+
+  return { ...workspace, ready, add, update, remove, stopContract };
 }
 
 export function useTheme() {
