@@ -183,7 +183,16 @@ export function useWorkspace() {
     return { ...previous, contracts, services: previous.services.filter((item) => item.id !== serviceId) };
   });
 
-  return { ...workspace, ready, add, update, remove };
+  const stopContract = (contractId: string) => setWorkspace((previous) => {
+    const endMonth = monthKey();
+    return {
+      ...previous,
+      contracts: previous.contracts.map((contract) => contract.id === contractId ? { ...contract, endMonth } : contract),
+      services: previous.services.filter((service) => service.contractId !== contractId || service.month <= endMonth),
+    };
+  });
+
+  return { ...workspace, ready, add, update, remove, stopContract };
 }
 
 export function useTheme() {
