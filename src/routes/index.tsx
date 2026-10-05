@@ -103,6 +103,7 @@ function App() {
         const result = workspace.add(service);
         if (!result.ok) return result.error;
         setMonth(service.month); setTab("inicio"); setOpen(false);
+        return undefined;
       }} />}
     </div>
   );
