@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Keep offline business data in one versioned workspace model with clients, recurring contracts, and monthly service instances, because migration and cross-entity totals must remain atomic.
