@@ -88,10 +88,10 @@ function App() {
       </div>
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 flex justify-center pb-[calc(1rem+env(safe-area-inset-bottom))]">
-        <nav className="pointer-events-auto grid grid-cols-5 items-center gap-1 rounded-full border border-glass-border bg-glass p-1.5 shadow-lg backdrop-blur-2xl backdrop-saturate-150">
+        <nav className="pointer-events-auto flex items-center gap-1 rounded-full border border-glass-border bg-glass p-1.5 shadow-lg backdrop-blur-2xl backdrop-saturate-150">
           <TabBtn icon={<Home size={17} />} label="Início" active={tab === "inicio"} onClick={() => changeTab("inicio")} />
           <TabBtn icon={<Users size={17} />} label="Clientes" active={tab === "clientes"} onClick={() => changeTab("clientes")} />
-          <button onClick={() => setOpen(true)} aria-label="Novo serviço" className="tap -mt-7 grid size-12 shrink-0 place-items-center rounded-full bg-flame text-on-color shadow-xl ring-4 ring-background">
+          <button onClick={() => setOpen(true)} aria-label="Novo serviço" className="tap mx-2 -mt-7 grid size-12 shrink-0 place-items-center rounded-full bg-flame text-on-color shadow-xl ring-4 ring-background">
             <Plus size={22} strokeWidth={2.5} />
           </button>
           <TabBtn icon={<Wallet size={17} />} label="Financeiro" active={tab === "financeiro"} onClick={() => changeTab("financeiro")} />
@@ -110,7 +110,7 @@ function App() {
 }
 
 function TabBtn({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
-  return <button onClick={onClick} aria-label={label} className={`tap grid size-10 place-items-center rounded-full ${active ? "bg-flame text-on-color" : "text-glass-foreground hover:text-on-color"}`}>{icon}</button>;
+  return <button onClick={onClick} aria-label={label} className={`tap grid size-10 place-items-center rounded-full ${active ? "bg-on-color/15 text-flame" : "text-glass-foreground hover:text-on-color"}`}>{icon}</button>;
 }
 
 function HomeTab({ workspace, month, goal }: { workspace: Workspace; month: string; goal: number | undefined }) {
@@ -138,13 +138,16 @@ function HomeTab({ workspace, month, goal }: { workspace: Workspace; month: stri
 function ServiceCard({ service, workspace }: { service: Service; workspace: Workspace }) {
   const nextPay = () => workspace.update(service.id, { payment: PAYMENTS[(PAYMENTS.indexOf(service.payment) + 1) % PAYMENTS.length] ?? "Não pago" });
   const phaseIndex = PHASES.indexOf(service.phase);
-  return <article className="rounded-2xl bg-surface px-3.5 py-3 ring-1 ring-border">
+  const [editing, setEditing] = useState(false);
+  return <><article className="rounded-2xl bg-surface px-3.5 py-3 ring-1 ring-border">
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
-      <div className="min-w-0"><h3 className="flex items-center gap-1 truncate text-sm font-bold leading-tight">{service.client}{service.contractId && <Repeat2 size={11} className="shrink-0 text-flame" aria-label="Serviço mensal" />}</h3><p className="truncate text-[11px] text-muted-foreground">{service.type || "Serviço"} · <b className="text-foreground">{brl(service.value)}</b></p></div>
-      <div className="flex shrink-0 items-center gap-1"><button onClick={nextPay} title="Toque para mudar" className={`tap rounded-full px-2.5 py-1 text-[10px] font-bold text-on-color ${payColor[service.payment]}`}>{service.payment}</button><button onClick={() => workspace.remove(service.id)} aria-label="Excluir" className="tap grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-muted"><Trash2 size={13} /></button></div>
+      <div className="min-w-0"><button onClick={() => setEditing(true)} className="block w-full min-w-0 text-left"><h3 className="flex items-center gap-1 truncate text-sm font-bold leading-tight">{service.client}{service.contractId && <Repeat2 size={11} className="shrink-0 text-flame" aria-label="Serviço mensal" />}</h3><p className="truncate text-[11px] text-muted-foreground">{service.type || "Serviço"} · <b className="text-foreground">{brl(service.value)}</b></p></button></div>
+      <div className="flex shrink-0 items-center gap-1"><button onClick={nextPay} title="Toque para mudar" className={`tap rounded-full px-2.5 py-1 text-[10px] font-bold text-on-color ${payColor[service.payment]}`}>{service.payment}</button><button onClick={() => setEditing(true)} aria-label="Editar" className="tap grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-muted"><Pencil size={13} /></button><button onClick={() => workspace.remove(service.id)} aria-label="Excluir" className="tap grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-muted"><Trash2 size={13} /></button></div>
     </div>
     <div className="mt-2 grid grid-cols-4 gap-1">{PHASES.map((phase, index) => <button key={phase} onClick={() => workspace.update(service.id, { phase })} className="tap group relative text-left before:absolute before:-inset-y-2.5 before:inset-x-0 before:content-['']" aria-label={phase}><span className={`block h-1.5 rounded-full ${index <= phaseIndex ? "bg-phase" : "bg-muted"}`} /><span className={`mt-1 block truncate text-[9px] font-bold ${index === phaseIndex ? "text-foreground" : "text-muted-foreground"}`}>{phase}</span></button>)}</div>
-  </article>;
+  </article>
+  {editing && <EditSheet clients={workspace.clients} initial={{ client: service.client, type: service.type, value: String(service.value), month: service.month, phase: service.phase, payment: service.payment }} title={service.contractId ? `Editar ${monthLabel(service.month).toLowerCase()}` : "Editar serviço"} lockMonth={!!service.contractId} onClose={() => setEditing(false)} onSave={(form) => { const message = workspace.editService(service.id, { ...form, value: Number(form.value) }); if (!message) setEditing(false); return message; }} />}
+  </>;
 }
 
 function ClientsTab({ workspace, onSelect }: { workspace: Workspace; onSelect: (id: string) => void }) {
@@ -181,6 +184,7 @@ function ClientDetail({ clientId, workspace, onMonth }: { clientId: string; work
 
 function ContractsTab({ workspace }: { workspace: Workspace }) {
   const current = monthKey();
+  const [editing, setEditing] = useState<Contract | null>(null);
   return <>
     <p className="mt-3 text-xs leading-relaxed text-muted-foreground">Contratos indefinidos criam um novo lançamento quando cada mês começa.</p>
     {workspace.contracts.length === 0 && <Empty text="Nenhum contrato mensal. Crie um pelo botão +." />}
@@ -188,10 +192,11 @@ function ContractsTab({ workspace }: { workspace: Workspace }) {
       const client = workspace.clients.find((item) => item.id === contract.clientId);
       const active = !contract.endMonth || contract.endMonth >= current;
       return <article key={contract.id} className="rounded-2xl bg-surface px-3.5 py-3 ring-1 ring-border">
-        <div className="flex items-start justify-between gap-3"><div className="min-w-0"><h3 className="truncate text-sm font-bold">{client?.name ?? "Cliente"}</h3><p className="truncate text-[11px] text-muted-foreground">{contract.type || "Serviço mensal"} · {brl(contract.value)}/mês</p></div><span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold text-on-color ${active ? "bg-mint" : "bg-muted-foreground"}`}>{active ? "Ativo" : "Encerrado"}</span></div>
+        <div className="flex items-start justify-between gap-3"><div className="min-w-0"><h3 className="truncate text-sm font-bold">{client?.name ?? "Cliente"}</h3><p className="truncate text-[11px] text-muted-foreground">{contract.type || "Serviço mensal"} · {brl(contract.value)}/mês</p></div><div className="flex shrink-0 items-center gap-1"><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold text-on-color ${active ? "bg-mint" : "bg-muted-foreground"}`}>{active ? "Ativo" : "Encerrado"}</span><button onClick={() => setEditing(contract)} aria-label="Editar contrato" className="tap grid size-7 place-items-center rounded-full text-muted-foreground hover:bg-muted"><Pencil size={13} /></button></div></div>
         <div className="mt-2 flex items-center justify-between gap-2 text-[10px] text-muted-foreground"><span>{monthLabel(contract.startMonth)} {contract.startMonth.slice(0, 4)} → {contract.endMonth ? `${monthLabel(contract.endMonth)} ${contract.endMonth.slice(0, 4)}` : "Sem data final"}</span>{active && !contract.endMonth && <button onClick={() => workspace.stopContract(contract.id)} className="tap shrink-0 font-bold text-coral">Encerrar neste mês</button>}</div>
       </article>;
     })}</div>
+    {editing && <ContractSheet contract={editing} clientName={workspace.clients.find((item) => item.id === editing.clientId)?.name ?? ""} clients={workspace.clients} onClose={() => setEditing(null)} onSave={(patch) => { const message = workspace.editContract(editing.id, patch); if (!message) setEditing(null); return message; }} />}
   </>;
 }
 
@@ -239,4 +244,43 @@ function MonthField({ label, value, onChange }: { label: string; value: string; 
   const [year, month] = value.split("-");
   const input = "w-full rounded-xl bg-muted px-3 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-flame";
   return <fieldset><legend className="mb-1 px-1 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{label}</legend><div className="grid grid-cols-2 gap-2"><select aria-label={`${label}: mês`} className={input} value={month} onChange={(event) => onChange(`${year}-${event.target.value}`)}>{MONTHS.map((name, index) => <option key={name} value={String(index + 1).padStart(2, "0")}>{name}</option>)}</select><input aria-label={`${label}: ano`} className={input} type="number" min="2000" max="2200" value={year} onChange={(event) => onChange(`${event.target.value}-${month}`)} /></div></fieldset>;
+}
+const sheetInput = "w-full rounded-xl bg-muted px-3 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-flame";
+
+function Sheet({ title, onClose, onSubmit, children }: { title: string; onClose: () => void; onSubmit: (event: React.FormEvent) => void; children: React.ReactNode }) {
+  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 md:items-center" onClick={onClose}>
+    <form onClick={(event) => event.stopPropagation()} onSubmit={onSubmit} className="max-h-[calc(100dvh-1rem)] w-full max-w-[480px] space-y-2.5 overflow-y-auto overscroll-contain rounded-t-3xl bg-background p-5 [padding-bottom:max(1.25rem,env(safe-area-inset-bottom))] animate-fade-in md:max-h-[90dvh] md:rounded-3xl">
+      <div className="flex items-center justify-between"><h2 className="font-display text-lg font-bold">{title}</h2><button type="button" onClick={onClose} aria-label="Fechar" className="tap grid size-8 place-items-center rounded-full bg-muted"><X size={15} /></button></div>
+      {children}
+    </form>
+  </div>;
+}
+
+type EditForm = { client: string; type: string; value: string; month: string; phase: Phase; payment: Payment };
+
+function EditSheet({ clients, initial, title, lockMonth, onClose, onSave }: { clients: Client[]; initial: EditForm; title: string; lockMonth: boolean; onClose: () => void; onSave: (form: EditForm) => string | undefined }) {
+  const [form, setForm] = useState(initial);
+  const [error, setError] = useState("");
+  return <Sheet title={title} onClose={onClose} onSubmit={(event) => { event.preventDefault(); const message = onSave(form); if (message) setError(message); }}>
+    <div><input className={sheetInput} list="edit-client-list" placeholder="Cliente" maxLength={80} value={form.client} onChange={(event) => setForm({ ...form, client: event.target.value })} /><datalist id="edit-client-list">{clients.map((client) => <option key={client.id} value={client.name} />)}</datalist></div>
+    <div className="grid grid-cols-2 gap-2"><input className={sheetInput} placeholder="Tipo" maxLength={100} value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })} /><input className={sheetInput} placeholder="Valor (R$)" inputMode="decimal" type="number" min="0" value={form.value} onChange={(event) => setForm({ ...form, value: event.target.value })} /></div>
+    {lockMonth ? <p className="px-1 text-[10px] text-muted-foreground">Mês de um contrato mensal: as mudanças valem só para esta competência.</p> : <MonthField label="Mês" value={form.month} onChange={(value) => setForm({ ...form, month: value })} />}
+    <div className="flex flex-wrap gap-1.5">{PHASES.map((phase) => <button type="button" key={phase} onClick={() => setForm({ ...form, phase })} className={`tap rounded-full px-3 py-1.5 text-[11px] font-bold ${form.phase === phase ? "bg-ink text-ink-foreground" : "bg-muted text-muted-foreground"}`}>{phase}</button>)}</div>
+    <div className="flex flex-wrap gap-1.5">{PAYMENTS.map((payment) => <button type="button" key={payment} onClick={() => setForm({ ...form, payment })} className={`tap rounded-full px-3 py-1.5 text-[11px] font-bold ${form.payment === payment ? `${payColor[payment]} text-on-color` : "bg-muted text-muted-foreground"}`}>{payment}</button>)}</div>
+    {error && <p role="alert" className="text-xs font-semibold text-coral">{error}</p>}
+    <button type="submit" className="tap w-full rounded-full bg-flame py-3 text-sm font-bold text-on-color">Salvar alterações</button>
+  </Sheet>;
+}
+
+function ContractSheet({ contract, clientName, clients, onClose, onSave }: { contract: Contract; clientName: string; clients: Client[]; onClose: () => void; onSave: (patch: { client: string; type: string; value: number; startMonth: string; endMonth: string | null }) => string | undefined }) {
+  const [form, setForm] = useState({ client: clientName, type: contract.type, value: String(contract.value), startMonth: contract.startMonth, indefinite: !contract.endMonth, endMonth: contract.endMonth ?? monthKey() });
+  const [error, setError] = useState("");
+  return <Sheet title="Editar contrato" onClose={onClose} onSubmit={(event) => { event.preventDefault(); const message = onSave({ client: form.client, type: form.type, value: Number(form.value), startMonth: form.startMonth, endMonth: form.indefinite ? null : form.endMonth }); if (message) setError(message); }}>
+    <div><input className={sheetInput} list="contract-client-list" placeholder="Cliente" maxLength={80} value={form.client} onChange={(event) => setForm({ ...form, client: event.target.value })} /><datalist id="contract-client-list">{clients.map((client) => <option key={client.id} value={client.name} />)}</datalist></div>
+    <div className="grid grid-cols-2 gap-2"><input className={sheetInput} placeholder="Tipo" maxLength={100} value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })} /><input className={sheetInput} placeholder="Valor mensal (R$)" inputMode="decimal" type="number" min="0" value={form.value} onChange={(event) => setForm({ ...form, value: event.target.value })} /></div>
+    <MonthField label="Mês inicial" value={form.startMonth} onChange={(value) => setForm({ ...form, startMonth: value })} />
+    <div className="rounded-xl border border-border p-3"><label className="flex items-center justify-between gap-3 text-xs font-bold"><span>Sem data final</span><input type="checkbox" checked={form.indefinite} onChange={(event) => setForm({ ...form, indefinite: event.target.checked })} className="size-4 accent-flame" /></label>{!form.indefinite && <div className="mt-2"><MonthField label="Mês final" value={form.endMonth} onChange={(value) => setForm({ ...form, endMonth: value })} /></div>}<p className="mt-2 text-[10px] leading-relaxed text-muted-foreground">O novo valor vale do mês atual em diante; meses passados mantêm o valor e os pagamentos. Meses fora do novo período são removidos.</p></div>
+    {error && <p role="alert" className="text-xs font-semibold text-coral">{error}</p>}
+    <button type="submit" className="tap w-full rounded-full bg-flame py-3 text-sm font-bold text-on-color">Salvar contrato</button>
+  </Sheet>;
 }
