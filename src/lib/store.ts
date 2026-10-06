@@ -196,7 +196,48 @@ export function useWorkspace() {
     };
   });
 
-  return { ...workspace, ready, add, update, remove, stopContract };
+  const ensureClient = (clients: Client[], name: string) => {
+    let client = clients.find((item) => normalizeName(item.name) === normalizeName(name));
+    if (!client) { client = { id: id(), name: name.trim() }; clients.push(client); }
+    return client;
+  };
+
+  const editService = (serviceId: string, patch: { client: string; type: string; value: number; month: string; phase: Phase; payment: Payment }) => {
+    const parsed = newServiceSchema.safeParse({ ...patch, recurring: false, endMonth: null });
+    if (!parsed.success) return parsed.error.issues[0]?.message ?? "Revise os dados";
+    const data = parsed.data;
+    setWorkspace((previous) => {
+      const clients = [...previous.clients];
+      const client = ensureClient(clients, data.client);
+      return { ...previous, clients, services: previous.services.map((service) => service.id === serviceId
+        ? { ...service, clientId: client.id, client: client.name, type: data.type.trim(), value: data.value, month: service.contractId ? service.month : data.month, phase: data.phase, payment: data.payment }
+        : service) };
+    });
+    return undefined;
+  };
+
+  const editContract = (contractId: string, patch: { client: string; type: string; value: number; startMonth: string; endMonth: string | null }) => {
+    const parsed = newServiceSchema.safeParse({ client: patch.client, type: patch.type, value: patch.value, month: patch.startMonth, phase: "Briefing", payment: "Não pago", recurring: true, endMonth: patch.endMonth });
+    if (!parsed.success) return parsed.error.issues[0]?.message ?? "Revise os dados";
+    const data = parsed.data;
+    const current = monthKey();
+    setWorkspace((previous) => {
+      const clients = [...previous.clients];
+      const client = ensureClient(clients, data.client);
+      const contracts = previous.contracts.map((contract) => contract.id === contractId
+        ? { ...contract, clientId: client.id, type: data.type.trim(), value: data.value, startMonth: data.month, endMonth: data.endMonth }
+        : contract);
+      const services = previous.services
+        .filter((service) => service.contractId !== contractId || (service.month >= data.month && (!data.endMonth || service.month <= data.endMonth)))
+        .map((service) => service.contractId === contractId
+          ? { ...service, clientId: client.id, client: client.name, type: data.type.trim(), value: service.month >= current ? data.value : service.value }
+          : service);
+      return materialize({ ...previous, clients, contracts, services });
+    });
+    return undefined;
+  };
+
+  return { ...workspace, ready, add, update, remove, stopContract, editService, editContract };
 }
 
 export function useTheme() {
