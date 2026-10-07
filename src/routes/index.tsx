@@ -77,9 +77,9 @@ function App() {
         </header>
 
         {(tab === "inicio" || tab === "financeiro") && (
-          <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto">
+          <div ref={monthBar} className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto">
             {months.map((value) => (
-              <button key={value} onClick={() => setMonth(value)} className={`tap shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold ring-1 ring-border ${value === month ? "bg-ink text-ink-foreground" : "bg-surface text-muted-foreground"}`}>
+              <button key={value} data-month={value} onClick={() => setMonth(value)} className={`tap shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold ring-1 ring-border ${value === month ? "bg-ink text-ink-foreground" : value > monthKey() ? "bg-surface text-muted-foreground/60" : "bg-surface text-muted-foreground"}`}>
                 {monthLabel(value)}{value.slice(0, 4) !== String(new Date().getFullYear()) && ` ${value.slice(2, 4)}`}
               </button>
             ))}
