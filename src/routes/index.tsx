@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BriefcaseBusiness, Check, ChevronLeft, Home, Moon, Pencil, Plus, Repeat2, Search, Sun, Target, Trash2, UserRound, Users, Wallet, X } from "lucide-react";
 import {
   PHASES, PAYMENTS, MONTHS, brl, monthKey, monthLabel, outstanding, received, useWorkspace, useTheme, useGoals,
@@ -38,10 +38,17 @@ function App() {
 
   const months = useMemo(() => {
     const values = new Set(workspace.services.map((service) => service.month));
-    values.add(monthKey());
+    const now = new Date();
+    for (let offset = -3; offset <= 3; offset++) values.add(monthKey(new Date(now.getFullYear(), now.getMonth() + offset, 1)));
     Object.keys(goals.goals).forEach((value) => values.add(value));
-    return [...values].sort().reverse();
+    return [...values].sort();
   }, [workspace.services, goals.goals]);
+  const monthBar = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const bar = monthBar.current;
+    const chip = bar?.querySelector<HTMLElement>(`[data-month="${month}"]`);
+    if (bar && chip) bar.scrollTo({ left: chip.offsetLeft - bar.offsetLeft - (bar.clientWidth - chip.offsetWidth) / 2, behavior: "smooth" });
+  }, [month, tab, months]);
 
   const title = selectedClient && tab === "clientes"
     ? workspace.clients.find((client) => client.id === selectedClient)?.name ?? "Cliente"
@@ -70,9 +77,9 @@ function App() {
         </header>
 
         {(tab === "inicio" || tab === "financeiro") && (
-          <div className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto">
+          <div ref={monthBar} className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto">
             {months.map((value) => (
-              <button key={value} onClick={() => setMonth(value)} className={`tap shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold ring-1 ring-border ${value === month ? "bg-ink text-ink-foreground" : "bg-surface text-muted-foreground"}`}>
+              <button key={value} data-month={value} onClick={() => setMonth(value)} className={`tap shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold ring-1 ring-border ${value === month ? "bg-ink text-ink-foreground" : value > monthKey() ? "bg-surface text-muted-foreground/60" : "bg-surface text-muted-foreground"}`}>
                 {monthLabel(value)}{value.slice(0, 4) !== String(new Date().getFullYear()) && ` ${value.slice(2, 4)}`}
               </button>
             ))}
