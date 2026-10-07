@@ -237,7 +237,35 @@ export function useWorkspace() {
     return undefined;
   };
 
-  return { ...workspace, ready, add, update, remove, stopContract, editService, editContract };
+  const deleteContract = (contractId: string) => setWorkspace((previous) => ({
+    ...previous,
+    contracts: previous.contracts.filter((contract) => contract.id !== contractId),
+    services: previous.services.filter((service) => service.contractId !== contractId),
+  }));
+
+  const renameClient = (clientId: string, name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return "Informe o nome";
+    if (trimmed.length > 80) return "Nome muito longo";
+    let message: string | undefined;
+    setWorkspace((previous) => {
+      if (previous.clients.some((client) => client.id !== clientId && normalizeName(client.name) === normalizeName(trimmed))) { message = "Já existe um cliente com esse nome"; return previous; }
+      return {
+        ...previous,
+        clients: previous.clients.map((client) => client.id === clientId ? { ...client, name: trimmed } : client),
+        services: previous.services.map((service) => service.clientId === clientId ? { ...service, client: trimmed } : service),
+      };
+    });
+    if (workspace.clients.some((client) => client.id !== clientId && normalizeName(client.name) === normalizeName(trimmed))) return "Já existe um cliente com esse nome";
+    return message;
+  };
+
+  const deleteClient = (clientId: string) => setWorkspace((previous) => {
+    if (previous.services.some((service) => service.clientId === clientId) || previous.contracts.some((contract) => contract.clientId === clientId)) return previous;
+    return { ...previous, clients: previous.clients.filter((client) => client.id !== clientId) };
+  });
+
+  return { ...workspace, ready, add, update, remove, stopContract, editService, editContract, deleteContract, renameClient, deleteClient };
 }
 
 export function useTheme() {
