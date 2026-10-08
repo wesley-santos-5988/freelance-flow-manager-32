@@ -274,6 +274,13 @@ export function useTheme() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("freela-theme", dark ? "dark" : "light");
+    const color = dark ? "#171411" : "#f5f3ec";
+    document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.remove());
+    const meta = document.createElement("meta");
+    meta.name = "theme-color";
+    meta.content = color;
+    document.head.appendChild(meta);
+    document.documentElement.style.colorScheme = dark ? "dark" : "light";
   }, [dark]);
   return { dark, toggle: () => setDark((value) => !value) };
 }
