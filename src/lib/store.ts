@@ -274,7 +274,7 @@ export function useTheme() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("freela-theme", dark ? "dark" : "light");
-    const color = getComputedStyle(document.documentElement).getPropertyValue("--background").trim() || (dark ? "#24211d" : "#f5f3ec");
+    const color = dark ? "#171411" : "#f5f3ec";
     document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.remove());
     const meta = document.createElement("meta");
     meta.name = "theme-color";
