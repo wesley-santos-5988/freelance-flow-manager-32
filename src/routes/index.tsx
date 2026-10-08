@@ -77,9 +77,9 @@ function App() {
         </header>
 
         {(tab === "inicio" || tab === "financeiro") && (
-          <div ref={monthBar} className="no-scrollbar mt-3 flex gap-1.5 overflow-x-auto">
+          <div ref={monthBar} className="no-scrollbar -mx-4 mt-3 flex gap-1.5 overflow-x-auto px-4">
             {months.map((value) => (
-              <button key={value} data-month={value} onClick={() => setMonth(value)} className={`tap shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold ring-1 ring-border ${value === month ? "bg-ink text-ink-foreground" : value > monthKey() ? "bg-surface text-muted-foreground/60" : "bg-surface text-muted-foreground"}`}>
+              <button key={value} data-month={value} onClick={() => setMonth(value)} className={`tap shrink-0 rounded-full border border-border px-3.5 py-1.5 text-xs font-semibold ${value === month ? "bg-ink text-ink-foreground" : value > monthKey() ? "bg-surface text-muted-foreground/60" : "bg-surface text-muted-foreground"}`}>
                 {monthLabel(value)}{value.slice(0, 4) !== String(new Date().getFullYear()) && ` ${value.slice(2, 4)}`}
               </button>
             ))}
@@ -134,7 +134,7 @@ function HomeTab({ workspace, month, goal }: { workspace: Workspace; month: stri
       </div>
       {goal ? <div className="mt-2.5"><div className="h-1.5 overflow-hidden rounded-full bg-on-color/25"><div className="h-full rounded-full bg-on-color transition-all" style={{ width: `${pct}%` }} /></div><p className="mt-1 text-[10px] font-semibold opacity-90">{rec >= goal ? "Meta batida!" : `${Math.round(pct)}% da meta de ${brl(goal)}`}</p></div> : null}
     </section>
-    <div className="no-scrollbar mt-3 flex items-center gap-1.5 overflow-x-auto">
+    <div className="no-scrollbar -mx-4 mt-3 flex items-center gap-1.5 overflow-x-auto px-4">
       {(["Todos", ...PAYMENTS] as const).map((value) => <button key={value} onClick={() => setFilter(value)} className={`tap shrink-0 rounded-full px-3 py-1 text-[11px] font-bold ${value === filter ? (value === "Todos" ? "bg-ink text-ink-foreground" : `${payColor[value]} text-on-color`) : "bg-muted text-muted-foreground"}`}>{value} · {value === "Todos" ? all.length : all.filter((service) => service.payment === value).length}</button>)}
     </div>
     {list.length === 0 && <Empty text="Nenhum serviço aqui. Toque no + para adicionar." />}
