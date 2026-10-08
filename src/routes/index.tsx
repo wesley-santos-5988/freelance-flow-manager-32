@@ -117,7 +117,7 @@ function App() {
 }
 
 function TabBtn({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active: boolean; onClick: () => void }) {
-  return <button onClick={onClick} aria-label={label} className={`tap grid size-10 place-items-center rounded-full ${active ? "bg-on-color/15 text-flame" : "text-glass-foreground hover:text-on-color"}`}>{icon}</button>;
+  return <button onClick={onClick} aria-label={label} aria-current={active ? "page" : undefined} className={`tap grid size-10 place-items-center rounded-full transition-all duration-300 ease-out ${active ? "bg-background text-flame shadow-sm scale-100" : "bg-transparent text-glass-foreground hover:text-on-color scale-95"}`}>{icon}</button>;
 }
 
 function HomeTab({ workspace, month, goal }: { workspace: Workspace; month: string; goal: number | undefined }) {
