@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Keep offline business data in one versioned workspace model with clients, recurring contracts, and monthly service instances, because migration and cross-entity totals must remain atomic.
+- The app must stay 100% offline (localStorage only, no server functions or backend) because it is packaged as a static WebView build with Capacitor (capacitor.config.ts → webDir ".output/public"); don't add anything that requires a runtime server.
