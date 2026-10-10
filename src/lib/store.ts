@@ -86,25 +86,30 @@ function monthRange(start: string, end: string) {
   return result;
 }
 
-function seedLegacy(): Omit<Service, "clientId">[] {
-  const month = monthKey();
-  return [
-    { id: "1", client: "Studio Mãos", type: "Design de logo", value: 1500, month, phase: "Em andamento", payment: "Pago" },
-    { id: "2", client: "Café do Bairro", type: "Landing page", value: 2100, month, phase: "Revisão", payment: "50%" },
-    { id: "3", client: "Bar do Zé", type: "Mural ilustrado", value: 3350, month, phase: "Entregue", payment: "Não pago" },
-  ];
-}
-
 function normalizeName(name: string) {
   return name.trim().toLocaleLowerCase("pt-BR");
 }
 
+const SEED_IDS = new Set(["1", "2", "3"]);
+const SEED_CLEANUP_KEY = "freela-seed-cleanup-v1";
+
+function cleanupSeed(workspace: Workspace): Workspace {
+  if (localStorage.getItem(SEED_CLEANUP_KEY)) return workspace;
+  localStorage.setItem(SEED_CLEANUP_KEY, "1");
+  if (workspace.services.every((service) => SEED_IDS.has(service.id) && !service.contractId)) {
+    return { version: 2, clients: [], contracts: [], services: [] };
+  }
+  const services = workspace.services.filter((service) => !(SEED_IDS.has(service.id) && !service.contractId));
+  const used = new Set([...services.map((service) => service.clientId), ...workspace.contracts.map((contract) => contract.clientId)]);
+  return { ...workspace, services, clients: workspace.clients.filter((client) => used.has(client.id)) };
+}
+
 function migrateLegacy(): Workspace {
-  let legacy: Omit<Service, "clientId">[] = seedLegacy();
+  let legacy: Omit<Service, "clientId">[] = [];
   try {
     const raw = localStorage.getItem(LEGACY_KEY);
     if (raw) legacy = JSON.parse(raw) as Omit<Service, "clientId">[];
-  } catch { /* Fall back to the starter rows when old data is invalid. */ }
+  } catch { /* Start empty when old data is invalid. */ }
   const clients: Client[] = [];
   const services = legacy.map((service) => {
     const clientName = String(service.client || "Cliente sem nome").trim();
@@ -136,9 +141,9 @@ function materialize(workspace: Workspace): Workspace {
 function loadWorkspace(): Workspace {
   try {
     const raw = localStorage.getItem(WORKSPACE_KEY);
-    if (raw) return materialize(JSON.parse(raw) as Workspace);
+    if (raw) return cleanupSeed(materialize(JSON.parse(raw) as Workspace));
   } catch { /* Migrate if the current local copy cannot be read. */ }
-  return migrateLegacy();
+  return cleanupSeed(migrateLegacy());
 }
 
 export function useWorkspace() {
