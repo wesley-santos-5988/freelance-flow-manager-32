@@ -18,6 +18,14 @@ const config: CapacitorConfig = {
     // Mantém o localStorage estável dentro do WebView, como no navegador.
     androidScheme: "https",
   },
+  plugins: {
+    SystemBars: {
+      // Injeta --safe-area-inset-* (top/bottom) no CSS do app. Requer Capacitor >= 8.3.2.
+      insetsHandling: "css",
+      // "LIGHT" = ícones/botões PRETOS das barras (fundo claro).
+      style: "LIGHT",
+    },
+  },
 };
 
 export default config;

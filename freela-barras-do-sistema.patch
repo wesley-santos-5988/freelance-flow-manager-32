@@ -1,0 +1,124 @@
+From aef9e6f53f64b2104fa94f3c1811b806c6f68434 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Mon, 19 Oct 2026 16:45:13 +0000
+Subject: [PATCH] Corrige margens/barras do sistema no Android (SystemBars +
+ safe-area)
+
+---
+ README.md            | 37 +++++++++++++++++++------------------
+ capacitor.config.ts  |  8 ++++++++
+ src/routes/index.tsx |  8 ++++----
+ 3 files changed, 31 insertions(+), 22 deletions(-)
+
+diff --git a/README.md b/README.md
+index c0fe758..236c699 100644
+--- a/README.md
++++ b/README.md
+@@ -56,26 +56,27 @@ npx cap open android
+ No Android Studio: **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
+ O `.apk` fica em `android/app/build/outputs/apk/debug/app-debug.apk`.
+ 
+-### Edge-to-Edge (barras do sistema transparentes)
+-
+-Em `android/app/src/main/java/.../MainActivity.java` (ou `.kt`):
+-
+-```kotlin
+-import android.os.Bundle
+-import androidx.core.view.WindowCompat
+-import com.getcapacitor.BridgeActivity
+-
+-class MainActivity : BridgeActivity() {
+-    override fun onCreate(savedInstanceState: Bundle?) {
+-        super.onCreate(savedInstanceState)
+-        // Ativa o modo imersivo: status bar e barra de gestos transparentes.
+-        WindowCompat.setDecorFitsSystemWindows(window, false)
+-    }
+-}
++### Edge-to-Edge (barras do sistema)
++
++Use **Capacitor 8.3.2 ou superior** (`npm ls @capacitor/core` mostra a versão).
++Para atualizar:
++
++```sh
++npm i @capacitor/core@latest @capacitor/android@latest
++npm i -D @capacitor/cli@latest
++npm run build
++npx cap sync
+ ```
+ 
+-A cor das barras já acompanha o tema do app (creme no claro, grafite no escuro)
+-porque o `theme-color` é atualizado dinamicamente pelo JavaScript.
++Não é preciso mexer no `MainActivity` (não use `setDecorFitsSystemWindows`,
++isso conflita com o tratamento nativo do Capacitor).
++
++- O Capacitor injeta as variáveis `--safe-area-inset-top/bottom` no CSS
++  (configurado em `capacitor.config.ts` → `plugins.SystemBars`). O app usa
++  essas variáveis em `src/routes/index.tsx` para criar as margens superior e
++  inferior, que ficam com a cor do background do tema.
++- `SystemBars.style = "LIGHT"` deixa ícones da status bar e botões da barra de
++  gestos **pretos**.
+ 
+ ### Ícone do app
+ 
+diff --git a/capacitor.config.ts b/capacitor.config.ts
+index af93f2f..970d07e 100644
+--- a/capacitor.config.ts
++++ b/capacitor.config.ts
+@@ -18,6 +18,14 @@ const config: CapacitorConfig = {
+     // Mantém o localStorage estável dentro do WebView, como no navegador.
+     androidScheme: "https",
+   },
++  plugins: {
++    SystemBars: {
++      // Injeta --safe-area-inset-* (top/bottom) no CSS do app. Requer Capacitor >= 8.3.2.
++      insetsHandling: "css",
++      // "LIGHT" = ícones/botões PRETOS das barras (fundo claro).
++      style: "LIGHT",
++    },
++  },
+ };
+ 
+ export default config;
+diff --git a/src/routes/index.tsx b/src/routes/index.tsx
+index ab099e9..45d2366 100644
+--- a/src/routes/index.tsx
++++ b/src/routes/index.tsx
+@@ -58,7 +58,7 @@ function App() {
+ 
+   return (
+     <div className="min-h-screen bg-background text-foreground">
+-      <div className="mx-auto max-w-[480px] px-4 pb-[calc(8rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))] md:max-w-2xl">
++      <div className="mx-auto max-w-[480px] px-4 pb-[calc(8rem+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))] pt-[calc(1rem+var(--safe-area-inset-top,env(safe-area-inset-top,0px)))] md:max-w-2xl">
+         <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+           <div className="min-w-0">
+             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+@@ -94,7 +94,7 @@ function App() {
+         {tab === "contratos" && <ContractsTab workspace={workspace} />}
+       </div>
+ 
+-      <div className="pointer-events-none fixed inset-x-0 bottom-0 flex justify-center pb-[calc(1rem+env(safe-area-inset-bottom))]">
++      <div className="pointer-events-none fixed inset-x-0 bottom-0 flex justify-center pb-[calc(1rem+var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))]">
+         <nav className="pointer-events-auto flex items-center gap-1 rounded-full border border-glass-border bg-glass p-1.5 shadow-lg backdrop-blur-2xl backdrop-saturate-150">
+           <TabBtn icon={<Home size={17} />} label="Início" active={tab === "inicio"} onClick={() => changeTab("inicio")} />
+           <TabBtn icon={<Users size={17} />} label="Clientes" active={tab === "clientes"} onClick={() => changeTab("clientes")} />
+@@ -239,7 +239,7 @@ function NewSheet({ clients, month, onClose, onSave }: { clients: Client[]; mont
+     if (message) setError(message);
+   };
+   return <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 md:items-center" onClick={onClose}>
+-    <form onClick={(event) => event.stopPropagation()} onSubmit={save} className="max-h-[calc(100dvh-1rem)] w-full max-w-[480px] space-y-2.5 overflow-y-auto overscroll-contain rounded-t-3xl bg-background p-5 [padding-bottom:max(1.25rem,env(safe-area-inset-bottom))] animate-fade-in md:max-h-[90dvh] md:rounded-3xl">
++    <form onClick={(event) => event.stopPropagation()} onSubmit={save} className="max-h-[calc(100dvh-1rem)] w-full max-w-[480px] space-y-2.5 overflow-y-auto overscroll-contain rounded-t-3xl bg-background p-5 [padding-bottom:max(1.25rem,var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))] animate-fade-in md:max-h-[90dvh] md:rounded-3xl">
+       <div className="flex items-center justify-between"><h2 className="font-display text-lg font-bold">Novo serviço</h2><button type="button" onClick={onClose} aria-label="Fechar" className="tap grid size-8 place-items-center rounded-full bg-muted"><X size={15} /></button></div>
+       <div><input className={input} list="client-list" placeholder="Cliente" maxLength={80} value={form.client} onChange={(event) => setForm({ ...form, client: event.target.value })} /><datalist id="client-list">{clients.map((client) => <option key={client.id} value={client.name} />)}</datalist><p className="mt-1 px-1 text-[10px] text-muted-foreground">Selecione um nome existente ou digite um novo.</p></div>
+       <div className="grid grid-cols-2 gap-2"><input className={input} placeholder="Tipo (Logo, Site…)" maxLength={100} value={form.type} onChange={(event) => setForm({ ...form, type: event.target.value })} /><input className={input} placeholder="Valor (R$)" inputMode="decimal" type="number" min="0" value={form.value} onChange={(event) => setForm({ ...form, value: event.target.value })} /></div>
+@@ -263,7 +263,7 @@ const sheetInput = "w-full rounded-xl bg-muted px-3 py-2.5 text-sm font-semibold
+ 
+ function Sheet({ title, onClose, onSubmit, children }: { title: string; onClose: () => void; onSubmit: (event: React.FormEvent) => void; children: React.ReactNode }) {
+   return <div className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 md:items-center" onClick={onClose}>
+-    <form onClick={(event) => event.stopPropagation()} onSubmit={onSubmit} className="max-h-[calc(100dvh-1rem)] w-full max-w-[480px] space-y-2.5 overflow-y-auto overscroll-contain rounded-t-3xl bg-background p-5 [padding-bottom:max(1.25rem,env(safe-area-inset-bottom))] animate-fade-in md:max-h-[90dvh] md:rounded-3xl">
++    <form onClick={(event) => event.stopPropagation()} onSubmit={onSubmit} className="max-h-[calc(100dvh-1rem)] w-full max-w-[480px] space-y-2.5 overflow-y-auto overscroll-contain rounded-t-3xl bg-background p-5 [padding-bottom:max(1.25rem,var(--safe-area-inset-bottom,env(safe-area-inset-bottom,0px)))] animate-fade-in md:max-h-[90dvh] md:rounded-3xl">
+       <div className="flex items-center justify-between"><h2 className="font-display text-lg font-bold">{title}</h2><button type="button" onClick={onClose} aria-label="Fechar" className="tap grid size-8 place-items-center rounded-full bg-muted"><X size={15} /></button></div>
+       {children}
+     </form>
+-- 
+2.43.0
+

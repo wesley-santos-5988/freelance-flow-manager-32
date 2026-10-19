@@ -56,26 +56,27 @@ npx cap open android
 No Android Studio: **Build > Build Bundle(s) / APK(s) > Build APK(s)**.
 O `.apk` fica em `android/app/build/outputs/apk/debug/app-debug.apk`.
 
-### Edge-to-Edge (barras do sistema transparentes)
+### Edge-to-Edge (barras do sistema)
 
-Em `android/app/src/main/java/.../MainActivity.java` (ou `.kt`):
+Use **Capacitor 8.3.2 ou superior** (`npm ls @capacitor/core` mostra a versão).
+Para atualizar:
 
-```kotlin
-import android.os.Bundle
-import androidx.core.view.WindowCompat
-import com.getcapacitor.BridgeActivity
-
-class MainActivity : BridgeActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        // Ativa o modo imersivo: status bar e barra de gestos transparentes.
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-    }
-}
+```sh
+npm i @capacitor/core@latest @capacitor/android@latest
+npm i -D @capacitor/cli@latest
+npm run build
+npx cap sync
 ```
 
-A cor das barras já acompanha o tema do app (creme no claro, grafite no escuro)
-porque o `theme-color` é atualizado dinamicamente pelo JavaScript.
+Não é preciso mexer no `MainActivity` (não use `setDecorFitsSystemWindows`,
+isso conflita com o tratamento nativo do Capacitor).
+
+- O Capacitor injeta as variáveis `--safe-area-inset-top/bottom` no CSS
+  (configurado em `capacitor.config.ts` → `plugins.SystemBars`). O app usa
+  essas variáveis em `src/routes/index.tsx` para criar as margens superior e
+  inferior, que ficam com a cor do background do tema.
+- `SystemBars.style = "LIGHT"` deixa ícones da status bar e botões da barra de
+  gestos **pretos**.
 
 ### Ícone do app
 
