@@ -44,14 +44,27 @@ type Workspace = { version: 2; clients: Client[]; contracts: Contract[]; service
 export const MONTHS = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 export const monthKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 export const monthLabel = (k: string) => MONTHS[Number(k.split("-")[1]) - 1] ?? "";
-export const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+export const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export const formatMoney = (n: number) => n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+export function parseMoney(raw: string): number {
+  const cleaned = raw.trim().replace(/[^\d,.-]/g, "");
+  if (!cleaned) return NaN;
+  const lastComma = cleaned.lastIndexOf(",");
+  const lastDot = cleaned.lastIndexOf(".");
+  let normalized: string;
+  if (lastComma > lastDot) normalized = cleaned.replace(/\./g, "").replace(",", ".");
+  else if (lastDot > lastComma) normalized = cleaned.replace(/,/g, "");
+  else normalized = cleaned;
+  const value = Number(normalized);
+  return Number.isFinite(value) ? Math.round(value * 100) / 100 : NaN;
+}
 export const received = (s: Service) => (s.payment === "Pago" ? s.value : s.payment === "50%" ? s.value / 2 : 0);
 export const outstanding = (s: Service) => s.value - received(s);
 
 export const newServiceSchema = z.object({
   client: z.string().trim().min(1, "Informe o cliente").max(80, "Nome muito longo"),
   type: z.string().trim().max(100, "Descrição muito longa"),
-  value: z.number().positive("Informe um valor maior que zero").max(100000000, "Valor muito alto"),
+  value: z.number({ invalid_type_error: "Informe um valor válido" }).positive("Informe um valor maior que zero").max(100000000, "Valor muito alto"),
   month: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, "Mês inicial inválido"),
   phase: z.enum(PHASES),
   payment: z.enum(PAYMENTS),
